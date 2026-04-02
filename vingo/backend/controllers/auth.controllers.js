@@ -8,17 +8,22 @@ export const signUp = async (req, res) => {
   try {
     const { name, email, password, role, mobile } = req.body;
     const user = await User.findOne({ email });
+    if (!name || !email || !password || !mobile || !role) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
+    }
     if (user) {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .json({ message: "User already exists" });
     }
-    if (!password || password.length < 6) {
+    if (password.length < 6) {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .json({ message: "Password must be at least 6 characters long" });
     }
-    if (!mobile || mobile.length != 10) {
+    if (mobile.length != 10) {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .json({ message: "mobile no must be of 10 digits" });
@@ -53,11 +58,11 @@ export const signUp = async (req, res) => {
 export const signIn = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne(email);
+    const user = await User.findOne({ email });
     if (!user) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Invalid email" });
+        .json({ message: "Email does not exists" });
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -153,6 +158,34 @@ export const resetPassword = async (req, res) => {
     return res
       .status(StatusCodes.OK)
       .json({ message: "Password reset successfully" });
+  } catch (error) {
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal server error:" + error.message });
+  }
+};
+
+export const googleAuth = async (req, res) => {
+  try {
+    const { name, email, mobile, role } = req.body;
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = await User.create({
+        name,
+        email,
+        mobile,
+        role,
+      });
+    }
+    const token = await genToken(user._id);
+    res.cookie("token", token, {
+      secure: false,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+    });
+    const { password: _, ...userData } = user._doc;
+    return res.status(StatusCodes.OK).json({ user: userData });
   } catch (error) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)

@@ -6,6 +6,9 @@ import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { serverUrl } from "../App";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../../firebase";
+import { ClipLoader } from "react-spinners";
 
 function SignIn() {
   const primaryColor = "#FF4d2d";
@@ -17,8 +20,11 @@ function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const[error,setError]=useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSignIn = async () => {
+    setLoading(true);
     try {
       const result = await axios.post(
         `${serverUrl}/api/auth/signin`,
@@ -28,9 +34,30 @@ function SignIn() {
         },
         { withCredentials: true },
       );
+      setError("");
       console.log(result);
     } catch (error) {
-      console.error("Error signing in:", error);
+      setError(error?.response?.data?.message || "Error signing in");
+    }finally {
+      setLoading(false);
+    }
+  };
+  const handleGoogleAuth = async () => {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    try {
+      const { data } = await axios.post(
+        `${serverUrl}/api/auth/google-auth`,
+        {
+          name: result.user.displayName,
+          email: result.user.email,
+        },
+        { withCredentials: true },
+      );
+        setError("");
+      console.log(data);
+    } catch (error) {
+      setError(error?.response?.data?.message || "Error signing in with Google");
     }
   };
 
@@ -103,11 +130,15 @@ function SignIn() {
         </div>
         <button
           className="w-full mt-4 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 transition duration-200 bg-[#ff4d2d] text-white cursor-pointer hover:bg-[#e64323]"
-          onClick={handleSignIn}
+          onClick={handleSignIn} disabled={loading}
         >
-          Sign In
+          {loading ? <ClipLoader color="#fff" size={20} /> : "Sign In"}
         </button>
-        <button className="w-full mt-4 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 transition duration-200 bg-white text-gray-700 cursor-pointer hover:bg-gray-100">
+        {error && <p className="text-red-500 text-center mt-5">*{error}</p>}
+        <button
+          className="w-full mt-4 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 transition duration-200 bg-white text-gray-700 cursor-pointer hover:bg-gray-100"
+          onClick={handleGoogleAuth} 
+        >
           <FcGoogle size={20} />
           Sign In with Google
         </button>
