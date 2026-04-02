@@ -20,6 +20,7 @@ function ForgotPassword() {
         {
           email,
         },
+        { withCredentials: true }
       );
       console.log(result);
       setStep(2);
