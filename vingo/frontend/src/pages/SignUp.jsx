@@ -9,6 +9,8 @@ import { serverUrl } from "../App";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../firebase";
 import { ClipLoader } from "react-spinners";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../../redux/userSlice";
 
 function SignUp() {
   const primaryColor = "#FF4d2d";
@@ -25,7 +27,7 @@ function SignUp() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const dispatch=useDispatch();
 
   
   const handleSignUp = async () => {
@@ -42,8 +44,8 @@ function SignUp() {
         },
         { withCredentials: true },
       );
-      console.log(result);
       setError("");
+      dispatch(setUserData(result.data.user));
     } catch (error) {
       setError(error?.response?.data?.message || "Error signing up");
     }finally {
@@ -68,7 +70,7 @@ function SignUp() {
         },
         { withCredentials: true },
       );
-      console.log(data);
+      dispatch(setUserData(data.user));
     } catch (error) {
       setError(
         error?.response?.data?.message || "Error signing in with Google",

@@ -5,13 +5,18 @@ import SignIn from './pages/SignIn'
 import ForgotPassword from './pages/ForgotPassword'
 export const serverUrl="http://localhost:8000"     
 import useGetCurrentUser from '../hooks/useGetCurrentUser'               // ✅ ADD THI
+import { useSelector } from 'react-redux'
+import{ Navigate } from 'react-router-dom'
+import Home from './pages/Home'
 function App() {
 useGetCurrentUser();
+const {userData}=useSelector((state)=>state.user);
   return (
     <Routes>
-      <Route path='/signup' element={<SignUp />} />
-      <Route path='/signin' element={<SignIn />} />
-      <Route path='/forgot-password' element={<ForgotPassword />} />
+      <Route path='/signup' element={!userData ? <SignUp /> : <Navigate to='/' />} />
+      <Route path='/signin' element={!userData ? <SignIn /> : <Navigate to='/' />} />
+      <Route path='/forgot-password' element={!userData ? <ForgotPassword /> : <Navigate to='/' />} />
+      <Route path='/' element={userData ?<Home />:<Navigate to='/signin' />} />
     </Routes>
   );
 }
