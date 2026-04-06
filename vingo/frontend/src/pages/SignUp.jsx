@@ -186,7 +186,7 @@ function SignUp() {
             Role
           </label>
           <div className="flex gap-2">
-            {["user", "owner", "deliveryboy"].map((r) => (
+            {["user", "owner", "deliveryBoy"].map((r) => (
               <button
                 className="flex-1 border rounded-lg px-3 py-2 text-center font-medium transition-colors"
                 onClick={() => setRole(r)}

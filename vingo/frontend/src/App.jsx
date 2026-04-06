@@ -8,8 +8,10 @@ import useGetCurrentUser from '../hooks/useGetCurrentUser'               // ✅ 
 import { useSelector } from 'react-redux'
 import{ Navigate } from 'react-router-dom'
 import Home from './pages/Home'
+import useGetCity from '../hooks/useGetCity'
 function App() {
 useGetCurrentUser();
+useGetCity();
 const {userData}=useSelector((state)=>state.user);
   return (
     <Routes>
