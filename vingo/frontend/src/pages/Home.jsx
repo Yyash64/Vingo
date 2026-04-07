@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import UserDashBoard from "../components/UserDashBoard";
-import OwnerDashBoard from "../components/OwnderDashBoard";
+import OwnerDashBoard from "../components/OwnerDashBoard";
 import DeliveryBoyDashBoard from "../components/DeliveryBoyDashBoard";
 
 function Home() {
